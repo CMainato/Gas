@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -32,7 +33,7 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
 
   List<LatLng> pLineCoordinates = [];
   Set<Polyline> polylineSet = {};
-
+  DirectionDetails? tripDirectionDetails;
   late Position currentPosition;
   var geoLocator = Geolocator();
   double bottomPaddingOfMap = 0;
@@ -42,13 +43,36 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
 
   double rideDetailsContainer = 0;
   double searchContainerHeight =300;
+
+  bool drawerOpen = true;
+
+
+  resetApp()
+  {
+    setState(() {
+      drawerOpen = true;
+      searchContainerHeight =300;
+      rideDetailsContainer = 0;
+      bottomPaddingOfMap = 230.0;
+
+      polylineSet.clear();
+      markersSet.clear();
+      circlesSet.clear();
+      pLineCoordinates.clear();
+    });
+
+    locatePosition();
+  }
+
   void displayRideDetailsContainer()async{
     await getPlaceDirection();
+
+
     setState(() {
       searchContainerHeight =0;
       rideDetailsContainer = 240.0;
       bottomPaddingOfMap = 230.0;
-
+      drawerOpen = false;
     });
   }
 
@@ -159,12 +183,17 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
 
           //HanbugerButton for Drawer
           Positioned(
-            top: 45.0,
+            top: 38.0,
             left: 22.0,
             child: GestureDetector(
               onTap: ()
               {
-                scaffoldKey.currentState!.openDrawer();
+                if (drawerOpen){
+                  scaffoldKey.currentState!.openDrawer();
+                }else{
+                  resetApp();
+                }
+
               },
               child: Container(
                 decoration: BoxDecoration(
@@ -184,7 +213,7 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
                 ),
                 child: CircleAvatar(
                   backgroundColor: Colors.white,
-                  child: Icon(Icons.menu, color: Colors.black,),
+                  child: Icon( (drawerOpen)? Icons.menu:Icons.close, color: Colors.black,),
                   radius: 20.0,
                 ),
 
@@ -350,11 +379,14 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
                                     Text("Car",style: TextStyle(fontSize: 18.0,fontFamily: "Brand-Bold",),
                                     ),
                                     Text(
-                                       "10Km",style: TextStyle(fontSize: 16.0,color: Colors.grey,),
+                                      ((tripDirectionDetails!= null)? tripDirectionDetails!.distanceText! :''),style: TextStyle(fontSize: 16.0,color: Colors.grey,),
                                     ),
                                   ],
                                 ),
-
+                                Expanded(child: Container()),
+                                Text(
+                                  ((tripDirectionDetails!= null)?'\$${AssistantMethods.calculateFares(tripDirectionDetails!)}' : ''),style: TextStyle(fontFamily: "Brand-Bold",),
+                                ),
                               ],
                             ),
                           ),
@@ -418,7 +450,9 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
     );
     
     var details = await AssistantMethods.obtainPlaceDirectionDetails(pickUpLatLng, dropOffLatLng);
-
+    setState(() {
+      tripDirectionDetails =details;
+    });
     Navigator.pop(context);
 
     print("this is Encoded Points ::");
