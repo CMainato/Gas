@@ -1,10 +1,13 @@
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:untitled1/Assistants/requestAssistant.dart';
 import 'package:untitled1/DataHandler/appData.dart';
 import 'package:untitled1/Models/address.dart';
+import 'package:untitled1/Models/allUsers.dart';
 import 'package:untitled1/Models/directDetails.dart';
 import 'package:untitled1/configMaps.dart';
 
@@ -77,6 +80,18 @@ class AssistantMethods
 
     return totalFareAmount.truncate();
 
+  }
+
+  static void getCurrentOnLineUserInfo()async{
+    firebaseUser = await FirebaseAuth.instance.currentUser;
+    String userId = firebaseUser!.uid;
+    DatabaseReference reference = FirebaseDatabase.instance.reference().child("users").child(userId);
+    reference.once().then( (DataSnapshot dataSnapShot)
+    {
+      if(dataSnapShot.value !=null){
+        userCurrentInfo  = Users.fromSnapshot(dataSnapShot);
+      }
+    });
   }
 
 }
