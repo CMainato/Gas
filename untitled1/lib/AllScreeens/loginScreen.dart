@@ -24,14 +24,14 @@ class LoginScreen extends StatelessWidget {
           padding:  EdgeInsets.all(8.0),
           child: Column(
             children: [
-              SizedBox(height: 45.0,),
+              SizedBox(height: 10.0,),
               Image(
                   image:AssetImage("images/logo.png"),
                   width: 350.0,
                   height: 350.0,
                   alignment: Alignment.center,
               ),
-              SizedBox(height: 1.0,),
+              SizedBox(height: 0.0,),
               Text("Ingresa como conductor",
               style: TextStyle(fontSize: 24.0,fontFamily: "Brand Bold"),
               textAlign: TextAlign.center,
@@ -48,7 +48,7 @@ class LoginScreen extends StatelessWidget {
                       controller:emailTextEditingController,
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
-                        labelText: "Correo",
+                        labelText: "Correo:",
                         labelStyle: TextStyle(
                           fontSize: 20.0,
                         ),
@@ -66,7 +66,7 @@ class LoginScreen extends StatelessWidget {
                       controller: passwordTextEditingController,
                       obscureText: true,
                       decoration: InputDecoration(
-                        labelText: "Contrase;a",
+                        labelText: "Contraseña:",
                         labelStyle: TextStyle(
                           fontSize: 20.0,
                         ),
@@ -88,7 +88,7 @@ class LoginScreen extends StatelessWidget {
                       onPressed: () {
                         if(!emailTextEditingController.text.contains("@"))
                         {
-                          displayToastMessage("El correo no es valido", context);
+                          displayToastMessage("El correo o contraseña no son validos ", context);
                         }else if(passwordTextEditingController.text.isEmpty) {
                           displayToastMessage("La contraseña es obligatoria", context);
                         }else
@@ -125,7 +125,7 @@ class LoginScreen extends StatelessWidget {
                 }
                 ,
                 child: Text(
-                  "No tienes una Cuenta? Registrate aqui.",
+                  "No tienes una Cuenta ? Registrate aqui.",
                 ),
               ),
 

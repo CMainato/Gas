@@ -32,7 +32,7 @@ class _SearchScreenState extends State<SearchScreen>
 
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.green,
       body: SingleChildScrollView(
         child: Padding(
         padding:  EdgeInsets.all(8.0),
@@ -41,7 +41,7 @@ class _SearchScreenState extends State<SearchScreen>
           Container(
             height: 215.0,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Colors.green,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black,
@@ -54,11 +54,15 @@ class _SearchScreenState extends State<SearchScreen>
             ),
 
             child: Padding(
+
               padding: EdgeInsets.only(left: 25.0, top: 25.0, right: 25.0, bottom: 20.0),
+
               child: Column(
+
                 children: [
                   SizedBox(height: 5.0),
                   Stack(
+
                     children: [
                       GestureDetector(
                         onTap:()
@@ -86,7 +90,7 @@ class _SearchScreenState extends State<SearchScreen>
                       Expanded(
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.grey[400],
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(5.0),
                             ),
                             child: Padding(
@@ -94,8 +98,8 @@ class _SearchScreenState extends State<SearchScreen>
                               child: TextField(
                                 controller: pickUpTextEditingController,
                                 decoration: InputDecoration(
-                                  hintText: "lugar de recogida",
-                                  fillColor: Colors.grey[400],
+                                  hintText: "Tu ubicacion",
+                                  fillColor: Colors.white,
                                   filled: true,
                                   border: InputBorder.none,
                                   isDense: true,
@@ -119,7 +123,7 @@ class _SearchScreenState extends State<SearchScreen>
                       Expanded(
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Colors.grey[400],
+                            color: Colors.white,
                             borderRadius: BorderRadius.circular(5.0),
 
                           ),
@@ -133,8 +137,8 @@ class _SearchScreenState extends State<SearchScreen>
                               },
                               controller: dropOffTextEditingController,
                               decoration: InputDecoration(
-                                hintText: "a Donde?",
-                                fillColor: Colors.grey[400],
+                                hintText: "A Donde quieres ir?",
+                                fillColor: Colors.white,
                                 filled: true,
                                 border: InputBorder.none,
                                 isDense: true,
@@ -228,7 +232,7 @@ class PredictionTile extends StatelessWidget {
                       SizedBox(height: 8.0,),
                       Text(placePredictions.main_text.toString(),overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 16.0),),
                       SizedBox(height: 2.0,),
-                      Text(placePredictions.secondary_text.toString(),overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 12.0,color: Colors.grey),),
+                      Text(placePredictions.secondary_text.toString(),overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 12.0,color: Colors.black54),),
                       SizedBox(height: 8.0,),
                     ],
                   ),
@@ -247,7 +251,7 @@ class PredictionTile extends StatelessWidget {
     showDialog(
         context: context,
         builder: (BuildContext context)
-    =>ProgressDialog(message: "configuracion caida, espera un chanse mijosaurio...."));
+    =>ProgressDialog(message: "Buscando, espera un chanse mijosaurio...."));
     String placeDetailsUrl="https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$mapKey";
     var res = await ResquestAssistant.getRequest(placeDetailsUrl);
     Navigator.pop(context);

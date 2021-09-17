@@ -335,7 +335,7 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
                             }
                         },
                       child: Container(decoration: BoxDecoration(
-                        color:   Colors.green,
+                        color:   Colors.white,
                         borderRadius: BorderRadius.circular(5.0),
                         boxShadow: [
                           BoxShadow(
@@ -350,7 +350,7 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
                           padding: const EdgeInsets.all(12.0),
                           child: Row(
                             children: [
-                              Icon(Icons.search, color: Colors.blueAccent,),
+                              Icon(Icons.search, color: Colors.black,),
                               SizedBox(width: 10.0,),
                               Text("Buscar")
                             ],
@@ -360,27 +360,35 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
                       ),
 
                       SizedBox(width: 24.0,),
+
                       Padding(
                         padding: const EdgeInsets.all(12.0),
                         child: Row(
                           children: [
                             Icon(Icons.home, color: Colors.black,),
                             SizedBox(width: 12.0,),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                    Provider.of<AppData>(context).pickUpLocation != null
-                                        ? Provider.of<AppData>(context).pickUpLocation?.placeName?? ''
-                                      : "Añade tu casa"
-                                ),
-                                SizedBox(height: 4.0,),
-                                Text("Direccion de tu casa", style: TextStyle(color: Colors.black54, fontSize:12.0 ),)
-                              ],
+                            Expanded(
+                              flex: 2,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+
+                                children: [
+                                  Text(
+                                      Provider.of<AppData>(context).pickUpLocation != null
+                                          ? Provider.of<AppData>(context).pickUpLocation?.placeName?? ''
+                                        : "Añade tu casa"
+                                  ),
+
+                                  SizedBox(height: 4.0,),
+                                  Text("Direccion de tu casa", style: TextStyle(color: Colors.black54, fontSize:12.0 ),)
+                                ],
+                              ),
                             ),
                           ],
                         ),
                       ),
+
+
 
                       SizedBox(width: 10.0,),
                       DividerWidget(),
@@ -420,7 +428,7 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
                 child: Container(
                   height: rideDetailsContainer,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Colors.green,
                     borderRadius: BorderRadius.only(topLeft: Radius.circular(16.0),topRight: Radius.circular(16.0),),
                     boxShadow: [
                       BoxShadow(
@@ -437,7 +445,7 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
                       children: [
                         Container(
                           width: double.infinity,
-                          color: Colors.tealAccent[100],
+                          color: Colors.indigo,
                           child: Padding(
                             padding: EdgeInsets.symmetric(horizontal: 16.0),
                             child: Row(
@@ -447,16 +455,16 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text("Car",style: TextStyle(fontSize: 18.0,fontFamily: "Brand-Bold",),
+                                    Text("Distancia:",style: TextStyle(fontSize: 18.0,fontFamily: "Brand-Bold",),
                                     ),
                                     Text(
-                                      ((tripDirectionDetails!= null)? tripDirectionDetails!.distanceText! :''),style: TextStyle(fontSize: 16.0,color: Colors.grey,),
+                                      ((tripDirectionDetails!= null)? tripDirectionDetails!.distanceText! :''),style: TextStyle(fontSize: 16.0,color: Colors.white,),
                                     ),
                                   ],
                                 ),
                                 Expanded(child: Container()),
                                 Text(
-                                  ((tripDirectionDetails!= null)?'\$${AssistantMethods.calculateFares(tripDirectionDetails!)}' : ''),style: TextStyle(fontFamily: "Brand-Bold",),
+                                  ((tripDirectionDetails!= null)?'\$${AssistantMethods.calculateFares(tripDirectionDetails!)}' : ''),style: TextStyle(fontFamily: "Brand-Bold",color: Colors.white,),
                                 ),
                               ],
                             ),
@@ -483,13 +491,13 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
                             onPressed: (){
                               displayRequesRideContainer();
                             },
-                            color: Theme.of(context).accentColor,
+                            color: Colors.indigo,
                             child: Padding(
                               padding: EdgeInsets.all(17.0),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text("Pedir",style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold,color: Colors.white),),
+                                  Text("Solicitar Vehiculo",style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold,color: Colors.white),),
                                   Icon(FontAwesomeIcons.taxi,color: Colors.white,size: 26.0,),
                                 ],
                               ),
@@ -508,7 +516,7 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.only(topLeft: Radius.circular(16.0),topRight:Radius.circular(16.0),),
-                color: Colors.white,
+                color: Colors.green,
                 boxShadow: [
                   BoxShadow(
                     spreadRadius: 0.5,
@@ -538,16 +546,18 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
       "Buscando a un conductor",
     ],
     textStyle: TextStyle(
-      fontSize: 55.0,
+      fontSize: 45.0,
       fontFamily: "Signatra"
     ),
     colors: [
-      Colors.green,
-      Colors.green,
-      Colors.green,
-      Colors.lightGreen,
-      Colors.lightGreen,
-      Colors.lightGreenAccent,
+      Colors.black,
+      Colors.black,
+      Colors.indigo,
+      Colors.indigo,
+      Colors.indigo,
+      Colors.indigoAccent,
+      Colors.indigoAccent,
+      Colors.blueAccent,
     ],
     textAlign: TextAlign.center // or Alignment.topLeft
     ),
@@ -560,11 +570,11 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
                         cancelRideRequest();
                         resetApp();},
                       child: Container(
-                        height: 60.0,
-                        width: 60.0,
+                        height: 50.0,
+                        width: 50.0,
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(26.0),
+                          color: Colors.indigo,
+                          borderRadius: BorderRadius.circular(16.0),
                           border: Border.all(width: 2.0,color: Colors.grey),
 
                         ),
