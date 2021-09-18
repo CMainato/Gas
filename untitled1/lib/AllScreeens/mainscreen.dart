@@ -6,6 +6,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
@@ -16,8 +17,10 @@ import 'package:untitled1/AllScreeens/searchScreen.dart';
 import 'package:untitled1/AllWidgets/Divider.dart';
 import 'package:untitled1/AllWidgets/progressDialog.dart';
 import 'package:untitled1/Assistants/assistantMethods.dart';
+import 'package:untitled1/Assistants/geoFireAssistant.dart';
 import 'package:untitled1/DataHandler/appData.dart';
 import 'package:untitled1/Models/directDetails.dart';
+import 'package:untitled1/Models/nearbyAvailableDrivers.dart';
 import 'package:untitled1/configMaps.dart';
 
 
@@ -51,7 +54,12 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
   double searchContainerHeight =300;
 
   bool drawerOpen = true;
+  bool nearbyAvailableDriverKeysLoaded = false;
+
   DatabaseReference? rideRequestRef;
+  BitmapDescriptor? nearByIcon;
+
+
   @override
   void initState() {
     // TODO: implement initState
@@ -66,12 +74,12 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
     var dropOff = Provider.of<AppData>(context, listen: false).dropOffLocation;
     Map pickUpLocMap ={
       "latitude":pickUp!.latitude.toString(),
-      "longitude":pickUp!.longitude.toString(),
+      "longitude":pickUp.longitude.toString(),
     };
 
     Map dropOffLocMap ={
       "latitude":dropOff!.latitude.toString(),
-      "longitude":dropOff!.longitude.toString(),
+      "longitude":dropOff.longitude.toString(),
 
     };
     Map rideInfoMap={
@@ -82,8 +90,8 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
       "created_at":DateTime.now().toString(),
       "rider_name":userCurrentInfo!.name,
       "rider_phone":userCurrentInfo!.phone,
-      "pickup_addres":pickUp!.placeName,
-      "dropoff_addres":dropOff!.placeName,
+      "pickup_addres":pickUp.placeName,
+      "dropoff_addres":dropOff.placeName,
     };
     rideRequestRef!.push().set(rideInfoMap);
   }
@@ -151,6 +159,7 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
     String address = await AssistantMethods.searchCoordinateAddress(position, context);
     print("Esta es tú dirección ::" + address);
 
+    initGeoFireListner();
   }
 
   static final CameraPosition _kGooglePlex = CameraPosition(
@@ -160,6 +169,7 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
 
   @override
   Widget build(BuildContext context) {
+    createIconMarker();
     return Scaffold(
       key: scaffoldKey,
       appBar: AppBar(
@@ -705,4 +715,95 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
       circlesSet.add(dropOffLocCircle);
     });
   }
+
+  void initGeoFireListner()
+  {
+    Geofire.initialize("availableDrivers");
+    //comment
+    Geofire.queryAtLocation(currentPosition.latitude, currentPosition.longitude, 15)!.listen((map) {
+      print(map);
+      if (map != null) {
+        var callBack = map['callBack'];
+
+        //latitude will be retrieved from map['latitude']
+        //longitude will be retrieved from map['longitude']
+
+        switch (callBack) {
+          case Geofire.onKeyEntered:
+            NearbyAvailableDrivers nearbyAvailableDrivers = NearbyAvailableDrivers();
+            nearbyAvailableDrivers.key = map['key'];
+            nearbyAvailableDrivers.latitude = map['latitude'];
+            nearbyAvailableDrivers.longitude = map['longitude'];
+            GeoFireAssistant.nearByAvailableDriversList.add(nearbyAvailableDrivers);
+            if(nearbyAvailableDriverKeysLoaded == true)
+              {
+                updateAvailableDriversOnMap();
+              }
+            break;
+
+          case Geofire.onKeyExited:
+            GeoFireAssistant.removeDriverFromList(map['key']);
+            updateAvailableDriversOnMap();
+            break;
+
+          case Geofire.onKeyMoved:
+            NearbyAvailableDrivers nearbyAvailableDrivers = NearbyAvailableDrivers();
+            nearbyAvailableDrivers.key = map['key'];
+            nearbyAvailableDrivers.latitude = map['latitude'];
+            nearbyAvailableDrivers.longitude = map['longitude'];
+            GeoFireAssistant.updateDriverNearbyLocation(nearbyAvailableDrivers);
+            updateAvailableDriversOnMap();
+            break;
+
+          case Geofire.onGeoQueryReady:
+            updateAvailableDriversOnMap();
+            break;
+        }
+      }
+
+      setState(() {});
+      });
+    //comment
+
+  }
+
+  void updateAvailableDriversOnMap()
+  {
+    setState(() {
+      markersSet.clear();
+    });
+
+    Set<Marker> tMakers = Set<Marker>();
+    for(NearbyAvailableDrivers driver in GeoFireAssistant.nearByAvailableDriversList)
+      {
+        LatLng driverAvailablePosition = LatLng(driver.latitude!, driver.longitude!);
+
+        Marker marker = Marker(
+          markerId: MarkerId('driver${driver.key}'),
+          position: driverAvailablePosition,
+          icon: nearByIcon!,
+          rotation: AssistantMethods.createRandomNumber(360),
+        );
+
+        tMakers.add(marker);
+      }
+
+    setState(() {
+      markersSet = tMakers;
+    });
+  }
+  
+  void createIconMarker()
+  {
+    if(nearByIcon == null)
+      {
+        ImageConfiguration imageConfiguration = createLocalImageConfiguration(context, size: Size(2,2));
+        BitmapDescriptor.fromAssetImage(imageConfiguration, "images/car_ios.png")
+            .then((value)
+        {
+          nearByIcon = value;
+        });
+      }
+  }
+
 }
