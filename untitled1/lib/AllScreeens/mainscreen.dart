@@ -69,7 +69,7 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
   }
 
   void saveRideRequest(){
-    rideRequestRef = FirebaseDatabase.instance.reference().child("Ride Request").push();
+    rideRequestRef = FirebaseDatabase.instance.reference().child("Ride Request");
     var pickUp = Provider.of<AppData>(context, listen: false).pickUpLocation;
     var dropOff = Provider.of<AppData>(context, listen: false).dropOffLocation;
     Map pickUpLocMap ={
