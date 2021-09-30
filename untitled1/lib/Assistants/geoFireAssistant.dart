@@ -16,5 +16,6 @@ class GeoFireAssistant
 
     nearByAvailableDriversList[index].latitude = driver.latitude;
     nearByAvailableDriversList[index].longitude = driver.longitude;
+
   }
 }
