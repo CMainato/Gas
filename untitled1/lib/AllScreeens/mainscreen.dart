@@ -15,6 +15,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:untitled1/AllScreeens/loginScreen.dart';
 import 'package:untitled1/AllScreeens/searchScreen.dart';
 import 'package:untitled1/AllWidgets/Divider.dart';
+import 'package:untitled1/AllWidgets/noDriverAvailableDialog.dart';
 import 'package:untitled1/AllWidgets/progressDialog.dart';
 import 'package:untitled1/Assistants/assistantMethods.dart';
 import 'package:untitled1/Assistants/geoFireAssistant.dart';
@@ -58,6 +59,8 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
 
   DatabaseReference? rideRequestRef;
   BitmapDescriptor? nearByIcon;
+
+  late List<NearbyAvailableDrivers> availableDrivers;
 
 
   @override
@@ -173,7 +176,7 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
     return Scaffold(
       key: scaffoldKey,
       appBar: AppBar(
-        title: Text("MainScreen"),
+        title: Text("Main Screen"),
       ),
       drawer: Container(
         color: Colors.white,
@@ -481,6 +484,7 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
                           ),
                         ),
                         SizedBox(height: 20.0,),
+
                         Padding(
                             padding: EdgeInsets.symmetric(horizontal: 20.0),
                         child: Row(
@@ -500,6 +504,8 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
                           child: RaisedButton(
                             onPressed: (){
                               displayRequesRideContainer();
+                              availableDrivers = GeoFireAssistant.nearByAvailableDriversList;
+                              searchNearsDriver();
                             },
                             color: Colors.indigo,
                             child: Padding(
@@ -804,6 +810,30 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
           nearByIcon = value;
         });
       }
+  }
+
+  void noDriverFound()
+  {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) => NoDriverAvailableDialog()
+    );
+  }
+
+  void searchNearsDriver()
+  {
+    if(availableDrivers.length == 0)
+      {
+        cancelRideRequest();
+        resetApp();
+        return;
+      }
+
+    var driver = availableDrivers[0];
+    availableDrivers.removeAt(0);
+
+
   }
 
 }
