@@ -24,6 +24,8 @@ import 'package:untitled1/Models/directDetails.dart';
 import 'package:untitled1/Models/nearbyAvailableDrivers.dart';
 import 'package:untitled1/configMaps.dart';
 
+import '../main.dart';
+
 
 class MainScreen  extends StatefulWidget {
 
@@ -54,6 +56,8 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
   double requestRideContainerHeight = 0;
   double searchContainerHeight =300;
 
+  double driverDetailsContainerHeight =0;
+
   bool drawerOpen = true;
   bool nearbyAvailableDriverKeysLoaded = false;
 
@@ -61,7 +65,9 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
   BitmapDescriptor? nearByIcon;
 
   late List<NearbyAvailableDrivers> availableDrivers;
+  String state ="normal";
 
+  late StreamSubscription<Event> rideStreamSubscription;
 
   @override
   void initState() {
@@ -97,12 +103,42 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
       "dropoff_addres":dropOff.placeName,
     };
     rideRequestRef!.push().set(rideInfoMap);
+    rideStreamSubscription=rideRequestRef!.onValue.listen((event) {
+      if(event.snapshot.value==null){
+        return;
+      }
+
+      if(event.snapshot.value["car_details"]!=null){
+       setState(() {
+         carDetailsDriver=event.snapshot.value["car_details"].toString();
+       });
+      }
+
+      if(event.snapshot.value["driver_name"]!=null){
+        setState(() {
+          driverName=event.snapshot.value["driver_name"].toString();
+        });
+      }
+      if(event.snapshot.value["driver_phone"]!=null){
+        setState(() {
+          driverPhone=event.snapshot.value["driver_phone"].toString();
+        });
+      }
+      if(event.snapshot.value["status"]!=null){
+        statusRide=event.snapshot.value["status"].toString();
+      }
+      if(statusRide=="accepted"){
+        displayDriverDetailsContainer();
+      }
+    });
   }
 
   void cancelRideRequest(){
 
     rideRequestRef!.remove();
-
+  setState(() {
+    state = "normal";
+  });
 
   }
 
@@ -116,6 +152,17 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
     });
 
     saveRideRequest();
+  }
+
+  void displayDriverDetailsContainer(){
+
+     setState(() {
+       requestRideContainerHeight = 0.0;
+       rideDetailsContainer = 0.0;
+       bottomPaddingOfMap = 300.0;
+       driverDetailsContainerHeight = 310.0;
+     });
+
   }
   resetApp()
   {
@@ -430,6 +477,8 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
               ),
             ),
           ),
+
+
           Positioned(
               bottom:0.0,
               left: 0.0,
@@ -503,6 +552,9 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
                           padding: EdgeInsets.symmetric(horizontal: 16.0),
                           child: RaisedButton(
                             onPressed: (){
+                              setState(() {
+                                state="requesting";
+                              });
                               displayRequesRideContainer();
                               availableDrivers = GeoFireAssistant.nearByAvailableDriversList;
                               searchNearsDriver();
@@ -525,6 +577,7 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
                 ),
               ),
           ),
+
           Positioned(
             bottom: 0.0,
             left: 0.0,
@@ -604,6 +657,119 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
                 ),
               ),
             ),
+          ),
+
+          Positioned(
+            bottom: 0.0,
+            left: 0.0,
+            right: 0.0,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(topLeft: Radius.circular(16.0),topRight:Radius.circular(16.0),),
+                color: Colors.green,
+                boxShadow: [
+                  BoxShadow(
+                    spreadRadius: 0.5,
+                    blurRadius: 16.0,
+                    color:Colors.black,
+                    offset: Offset(0.7,0.7),
+                  )
+                ],
+              ),
+              height: driverDetailsContainerHeight,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0,vertical: 18.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 6.0,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text( rideStatus,textAlign: TextAlign.center,style:TextStyle(fontSize: 20.0,fontFamily: "Brand-Bold") ,),
+
+                      ],
+                    ),
+
+                    SizedBox(height: 22.0,),
+                    Divider(height: 2.0,thickness: 2.0,),
+                    SizedBox(height: 22.0,),
+
+
+                    Text(carDetailsDriver,style: TextStyle(color: Colors.green),),
+                    Text(driverName,style: TextStyle(fontSize: 20.0),),
+                    SizedBox(height: 22.0,),
+                    Divider(height: 2.0,thickness: 2.0,),
+                    SizedBox(height: 22.0,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              height: 55.0,
+                              width: 55.0,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(Radius.circular(26.0)),
+                                border: Border.all(width: 2.0,color: Colors.grey),
+
+                              ),
+                              child: Icon(
+                                Icons.call,
+                              ),
+                            ),
+                            SizedBox(height: 10.0,),
+                            Text("LlAMAR"),
+                          ],
+                        ),
+
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              height: 55.0,
+                              width: 55.0,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(Radius.circular(26.0)),
+                                border: Border.all(width: 2.0,color: Colors.grey),
+
+                              ),
+                              child: Icon(
+                                Icons.list,
+                              ),
+                            ),
+                            SizedBox(height: 10.0,),
+                            Text("Detalles"),
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              height: 55.0,
+                              width: 55.0,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(Radius.circular(26.0)),
+                                border: Border.all(width: 2.0,color: Colors.grey),
+
+                              ),
+                              child: Icon(
+                                Icons.close,
+                              ),
+                            ),
+                            SizedBox(height: 10.0,),
+                            Text("Cancelar"),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                  ],
+                ),
+              ),
+            ),
+
           ),
         ],
       ) ,
@@ -827,13 +993,60 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
       {
         cancelRideRequest();
         resetApp();
+        noDriverFound();
         return;
       }
 
     var driver = availableDrivers[0];
+    notifyDriver(driver);
     availableDrivers.removeAt(0);
 
 
   }
+  void notifyDriver(NearbyAvailableDrivers driver)
+  {
+    driversRef.child((driver.key).toString()).child("newRide").set(rideRequestRef!.key);
 
+    driversRef.child((driver.key).toString()).child("token").once().then((DataSnapshot snap){
+      if(snap.value != null) {
+        String token = snap.value.toString();
+        AssistantMethods.sendNotificationToDriver(
+            token, context, rideRequestRef!.key);
+      }else{
+
+        return;
+      }
+      const oneSecondPassed = Duration(seconds: 1);
+      var timer = Timer.periodic(oneSecondPassed, (timer){
+
+        if(state != "requesting")
+        {
+          driversRef.child((driver.key).toString()).child("newRide").set("cancelled");
+          driversRef.child((driver.key).toString()).child("newRide").onDisconnect();
+          driverRequestTimeout = 40;
+          timer.cancel();
+        }
+        driverRequestTimeout = driverRequestTimeout -1;
+        driversRef.child((driver.key).toString()).child("newRide").onValue.listen((event) {
+          if(event.snapshot.value.toString() == "accepted")
+          {
+            driversRef.child((driver.key).toString()).child("newRide").onDisconnect();
+            driverRequestTimeout = 40;
+            timer.cancel();
+          }
+        });
+
+
+        if(driverRequestTimeout ==0){
+          driversRef.child((driver.key).toString()).child("newRide").set("timeout");
+          driversRef.child((driver.key).toString()).child("newRide").onDisconnect();
+          driverRequestTimeout = 40;
+          timer.cancel();
+
+          searchNearsDriver();
+        }
+
+      });
+      });
+  }
 }
