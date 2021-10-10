@@ -149,7 +149,7 @@ class LoginScreen extends StatelessWidget {
         }
     );
 
-    final User? firebaseUser = (await _firebaseAuth
+    final User firebaseUser = (await _firebaseAuth
         .signInWithEmailAndPassword(
         email: emailTextEditingController.text,
         password: passwordTextEditingController.text

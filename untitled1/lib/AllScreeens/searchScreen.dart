@@ -9,7 +9,7 @@ import 'package:untitled1/Models/placePredictions.dart';
 import 'package:untitled1/configMaps.dart';
 
 class SearchScreen extends StatefulWidget {
-  const SearchScreen({Key? key}) : super(key: key);
+  const SearchScreen({Key key}) : super(key: key);
 
   @override
   _SearchScreenState createState() => _SearchScreenState();
@@ -27,7 +27,7 @@ class _SearchScreenState extends State<SearchScreen>
   Widget build(BuildContext context)
   {
 
-    String placeAddress = Provider.of<AppData>(context).pickUpLocation!.placeName ?? "";
+    String placeAddress = Provider.of<AppData>(context).pickUpLocation.placeName ?? "";
     pickUpTextEditingController.text = placeAddress;
 
 
@@ -207,7 +207,7 @@ class _SearchScreenState extends State<SearchScreen>
 }
 class PredictionTile extends StatelessWidget {
   final PlacePredictions placePredictions;
-  PredictionTile ({Key? key, required this.placePredictions}):super(key: key);
+  PredictionTile ({Key key,  this.placePredictions}):super(key: key);
 
 
   @override

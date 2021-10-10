@@ -195,7 +195,7 @@ class RegistrationScreen extends StatelessWidget {
         }
     );
 
-    final User? firebaseUser = (await _firebaseAuth
+    final User firebaseUser = (await _firebaseAuth
         .createUserWithEmailAndPassword(
         email: emailTextEditingController.text,
         password: passwordTextEditingController.text
