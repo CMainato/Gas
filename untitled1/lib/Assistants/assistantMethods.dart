@@ -46,7 +46,7 @@ class AssistantMethods
   }
 
 
-  static Future<DirectionDetails?> obtainPlaceDirectionDetails(LatLng initialPosition, LatLng finalPosition) async
+  static Future<DirectionDetails> obtainPlaceDirectionDetails(LatLng initialPosition, LatLng finalPosition) async
   {
     String directionUrl = "https://maps.googleapis.com/maps/api/directions/json?origin=${initialPosition.latitude},${initialPosition.longitude}&destination=${finalPosition.latitude},${finalPosition.longitude}&key=$mapKey";
 
@@ -74,8 +74,8 @@ class AssistantMethods
   static int calculateFares(DirectionDetails directionDetails)
   {
     // in terms USD
-    double timeTraveledFare = (directionDetails.durationValue! / 60) * 0.20;
-    double distanceTraveledFare = (directionDetails.distanceValue! / 1000) * 0.20;
+    double timeTraveledFare = (directionDetails.durationValue / 60) * 0.20;
+    double distanceTraveledFare = (directionDetails.distanceValue / 1000) * 0.20;
     double totalFareAmount = timeTraveledFare + distanceTraveledFare;
 
     //Local Currency
@@ -88,7 +88,7 @@ class AssistantMethods
 
   static void getCurrentOnLineUserInfo()async{
     firebaseUser = await FirebaseAuth.instance.currentUser;
-    String userId = firebaseUser!.uid;
+    String userId = firebaseUser.uid;
     DatabaseReference reference = FirebaseDatabase.instance.reference().child("users").child(userId);
     reference.once().then( (DataSnapshot dataSnapShot)
     {
@@ -116,7 +116,7 @@ class AssistantMethods
 
     Map notificationMap =
     {
-      'body': 'DropOff Address, ${destionation!.placeName}',
+      'body': 'DropOff Address, ${destionation.placeName}',
       'title': 'New Ride Request'
     };
 
@@ -136,7 +136,7 @@ class AssistantMethods
       "to": token,
     };
     var res = await http.post(
-        Uri.parse('https://fcm.googleapis.com/fcm/send') ,
+        'https://fcm.googleapis.com/fcm/send',
       headers: headerMap,
       body: jsonEncode(sendNotificationMap)
     );

@@ -4,8 +4,8 @@ import 'package:untitled1/Models/allUsers.dart';
 
 String mapKey ="AIzaSyBGCJr3ayZ3-2lNbYrmkieT4Oj7JCxDUZo";
 
-User? firebaseUser;
-Users? userCurrentInfo;
+User firebaseUser;
+Users userCurrentInfo;
 int driverRequestTimeout = 40;
 String statusRide ="";
 String rideStatus  ="El conductor esta llegando";

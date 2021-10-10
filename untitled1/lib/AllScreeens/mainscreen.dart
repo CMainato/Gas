@@ -38,14 +38,14 @@ class MainScreen  extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
   Completer<GoogleMapController> _controllerGoogleMap = Completer();
-  late GoogleMapController newGoogleMapController;
+   GoogleMapController newGoogleMapController;
 
   GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
 
   List<LatLng> pLineCoordinates = [];
   Set<Polyline> polylineSet = {};
-  DirectionDetails? tripDirectionDetails;
-  late Position currentPosition;
+  DirectionDetails tripDirectionDetails;
+   Position currentPosition;
   var geoLocator = Geolocator();
   double bottomPaddingOfMap = 0;
 
@@ -61,13 +61,13 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
   bool drawerOpen = true;
   bool nearbyAvailableDriverKeysLoaded = false;
 
-  DatabaseReference? rideRequestRef;
-  BitmapDescriptor? nearByIcon;
+  DatabaseReference rideRequestRef;
+  BitmapDescriptor nearByIcon;
 
-  late List<NearbyAvailableDrivers> availableDrivers;
+   List<NearbyAvailableDrivers> availableDrivers;
   String state ="normal";
 
-  late StreamSubscription<Event> rideStreamSubscription;
+   StreamSubscription<Event> rideStreamSubscription;
 
   @override
   void initState() {
@@ -78,16 +78,16 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
   }
 
   void saveRideRequest(){
-    rideRequestRef = FirebaseDatabase.instance.reference().child("Ride Request");
+    rideRequestRef = FirebaseDatabase.instance.reference().child("Ride Request").push();
     var pickUp = Provider.of<AppData>(context, listen: false).pickUpLocation;
     var dropOff = Provider.of<AppData>(context, listen: false).dropOffLocation;
     Map pickUpLocMap ={
-      "latitude":pickUp!.latitude.toString(),
+      "latitude":pickUp.latitude.toString(),
       "longitude":pickUp.longitude.toString(),
     };
 
     Map dropOffLocMap ={
-      "latitude":dropOff!.latitude.toString(),
+      "latitude":dropOff.latitude.toString(),
       "longitude":dropOff.longitude.toString(),
 
     };
@@ -97,13 +97,13 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
       "pickup":pickUpLocMap,
       "dropoff":dropOffLocMap,
       "created_at":DateTime.now().toString(),
-      "rider_name":userCurrentInfo!.name,
-      "rider_phone":userCurrentInfo!.phone,
+      "rider_name":userCurrentInfo.name,
+      "rider_phone":userCurrentInfo.phone,
       "pickup_addres":pickUp.placeName,
       "dropoff_addres":dropOff.placeName,
     };
-    rideRequestRef!.push().set(rideInfoMap);
-    rideStreamSubscription=rideRequestRef!.onValue.listen((event) {
+    rideRequestRef.push().set(rideInfoMap);
+    rideStreamSubscription=rideRequestRef.onValue.listen((event) {
       if(event.snapshot.value==null){
         return;
       }
@@ -135,7 +135,7 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
 
   void cancelRideRequest(){
 
-    rideRequestRef!.remove();
+    rideRequestRef.remove();
   setState(() {
     state = "normal";
   });
@@ -320,7 +320,7 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
               onTap: ()
               {
                 if (drawerOpen){
-                  scaffoldKey.currentState!.openDrawer();
+                  scaffoldKey.currentState.openDrawer();
                 }else{
                   resetApp();
                 }
@@ -520,13 +520,13 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
                                     Text("Distancia:",style: TextStyle(fontSize: 18.0,fontFamily: "Brand-Bold",),
                                     ),
                                     Text(
-                                      ((tripDirectionDetails!= null)? tripDirectionDetails!.distanceText! :''),style: TextStyle(fontSize: 16.0,color: Colors.white,),
+                                      ((tripDirectionDetails!= null)? tripDirectionDetails.distanceText :''),style: TextStyle(fontSize: 16.0,color: Colors.white,),
                                     ),
                                   ],
                                 ),
                                 Expanded(child: Container()),
                                 Text(
-                                  ((tripDirectionDetails!= null)?'\$${AssistantMethods.calculateFares(tripDirectionDetails!)}' : ''),style: TextStyle(fontFamily: "Brand-Bold",color: Colors.white,),
+                                  ((tripDirectionDetails!= null)?'\$${AssistantMethods.calculateFares(tripDirectionDetails)}' : ''),style: TextStyle(fontFamily: "Brand-Bold",color: Colors.white,),
                                 ),
                               ],
                             ),
@@ -565,7 +565,7 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text("Solicitar Vehiculo",style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold,color: Colors.white),),
+                                  Text("Request",style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold,color: Colors.white),),
                                   Icon(FontAwesomeIcons.taxi,color: Colors.white,size: 26.0,),
                                 ],
                               ),
@@ -779,11 +779,11 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
 
   Future<void> getPlaceDirection() async
   {
-    var initialPos = Provider.of<AppData>(context, listen: false).pickUpLocation!;
-    var finalPos = Provider.of<AppData>(context, listen: false).dropOffLocation!;
+    var initialPos = Provider.of<AppData>(context, listen: false).pickUpLocation;
+    var finalPos = Provider.of<AppData>(context, listen: false).dropOffLocation;
 
-    var pickUpLatLng = LatLng(initialPos.latitude!, initialPos.longitude!);
-    var dropOffLatLng = LatLng(finalPos.latitude!, finalPos.longitude!);
+    var pickUpLatLng = LatLng(initialPos.latitude, initialPos.longitude);
+    var dropOffLatLng = LatLng(finalPos.latitude, finalPos.longitude);
 
     showDialog(
         context: context,
@@ -797,10 +797,10 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
     Navigator.pop(context);
 
     print("this is Encoded Points ::");
-    print(details!.encodedPoints);
+    print(details.encodedPoints);
 
     PolylinePoints polylinePoints = PolylinePoints();
-    List<PointLatLng> decodedPolyLinePointsResult = polylinePoints.decodePolyline(details.encodedPoints!);
+    List<PointLatLng> decodedPolyLinePointsResult = polylinePoints.decodePolyline(details.encodedPoints);
 
     pLineCoordinates.clear();
 
@@ -892,7 +892,7 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
   {
     Geofire.initialize("availableDrivers");
     //comment
-    Geofire.queryAtLocation(currentPosition.latitude, currentPosition.longitude, 15)!.listen((map) {
+    Geofire.queryAtLocation(currentPosition.latitude, currentPosition.longitude, 15).listen((map) {
       print(map);
       if (map != null) {
         var callBack = map['callBack'];
@@ -948,12 +948,12 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
     Set<Marker> tMakers = Set<Marker>();
     for(NearbyAvailableDrivers driver in GeoFireAssistant.nearByAvailableDriversList)
       {
-        LatLng driverAvailablePosition = LatLng(driver.latitude!, driver.longitude!);
+        LatLng driverAvailablePosition = LatLng(driver.latitude, driver.longitude);
 
         Marker marker = Marker(
           markerId: MarkerId('driver${driver.key}'),
           position: driverAvailablePosition,
-          icon: nearByIcon!,
+          icon: nearByIcon,
           rotation: AssistantMethods.createRandomNumber(360),
         );
 
@@ -1005,13 +1005,13 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
   }
   void notifyDriver(NearbyAvailableDrivers driver)
   {
-    driversRef.child((driver.key).toString()).child("newRide").set(rideRequestRef!.key);
+    driversRef.child((driver.key).toString()).child("newRide").set(rideRequestRef.key);
 
     driversRef.child((driver.key).toString()).child("token").once().then((DataSnapshot snap){
       if(snap.value != null) {
         String token = snap.value.toString();
         AssistantMethods.sendNotificationToDriver(
-            token, context, rideRequestRef!.key);
+            token, context, rideRequestRef.key);
       }else{
 
         return;
