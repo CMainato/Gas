@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:url_launcher/url_launcher.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -14,6 +14,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:untitled1/AllScreeens/loginScreen.dart';
 import 'package:untitled1/AllScreeens/searchScreen.dart';
+import 'package:untitled1/AllWidgets/CollectFareDialog.dart';
 import 'package:untitled1/AllWidgets/Divider.dart';
 import 'package:untitled1/AllWidgets/noDriverAvailableDialog.dart';
 import 'package:untitled1/AllWidgets/progressDialog.dart';
@@ -23,6 +24,7 @@ import 'package:untitled1/DataHandler/appData.dart';
 import 'package:untitled1/Models/directDetails.dart';
 import 'package:untitled1/Models/nearbyAvailableDrivers.dart';
 import 'package:untitled1/configMaps.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../main.dart';
 
@@ -69,6 +71,8 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
 
    StreamSubscription<Event> rideStreamSubscription;
 
+   bool isRequestingPositionDetails = false;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -102,8 +106,9 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
       "pickup_addres":pickUp.placeName,
       "dropoff_addres":dropOff.placeName,
     };
-    rideRequestRef.push().set(rideInfoMap);
-    rideStreamSubscription=rideRequestRef.onValue.listen((event) {
+    rideRequestRef.set(rideInfoMap);
+
+    rideStreamSubscription=rideRequestRef.onValue.listen((event) async{
       if(event.snapshot.value==null){
         return;
       }
@@ -123,15 +128,114 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
         setState(() {
           driverPhone=event.snapshot.value["driver_phone"].toString();
         });
+      }if(event.snapshot.value["driver_location"]!=null)
+      {
+          double driverLat = double.parse(event.snapshot.value["driver_location"]["latitude"].toString());
+          double driverLng = double.parse(event.snapshot.value["driver_location"]["longitude"].toString());
+          LatLng driverCurrentLocation = LatLng(driverLat, driverLng);
+          if(statusRide == "accepted")
+            {
+              updateRideTimeToPickUpLoc(driverCurrentLocation);
+            }
+          else if(statusRide == "onride")
+            {
+              updateRideTimeToDropOffLoc(driverCurrentLocation);
+            }
+          else if(statusRide == "arrived")
+          {
+            setState(() {
+              rideStatus = "Conductor ha llegado.";
+            });
+
+          }
       }
       if(event.snapshot.value["status"]!=null){
         statusRide=event.snapshot.value["status"].toString();
       }
-      if(statusRide=="accepted"){
+      if(statusRide=="accepted")
+      {
         displayDriverDetailsContainer();
+        Geofire.stopListener();
+        deleteGeofileMarkers();
       }
+      if(statusRide=="ended")
+      {
+        if(event.snapshot.value["fares"] != null)
+          {
+            int fare = int.parse(event.snapshot.value["fares"].toString());
+            var res = await showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (BuildContext context) => CollectFareDialog(paymentMethod: "cash", fareAmount: fare,),
+            );
+            if (res == "close")
+              {
+                rideRequestRef.onDisconnect();
+                rideRequestRef = null;
+                rideStreamSubscription.cancel();
+                rideStreamSubscription = null;
+                resetApp();
+              }
+          }
+      }
+
     });
   }
+
+  void deleteGeofileMarkers()
+  {
+    setState(() {
+      markersSet.removeWhere((element) => element.markerId.value.contains("driver"));
+    });
+  }
+
+  void updateRideTimeToPickUpLoc(LatLng driverCurrentLocation) async
+  {
+    if(isRequestingPositionDetails == false)
+    {
+      isRequestingPositionDetails = true;
+
+      var positionUserLatLng = LatLng(currentPosition.latitude, currentPosition.longitude);
+      var details = await AssistantMethods.obtainPlaceDirectionDetails(driverCurrentLocation, positionUserLatLng);
+
+      if(details == null)
+      {
+        return;
+      }
+      setState(() {
+        rideStatus = "Conductor en camino - "+ details.durationText;
+      });
+
+      isRequestingPositionDetails = false;
+    }
+
+  }
+
+
+  void updateRideTimeToDropOffLoc(LatLng driverCurrentLocation) async
+  {
+    if(isRequestingPositionDetails == false)
+    {
+      isRequestingPositionDetails = true;
+
+      var dropOff = Provider.of<AppData>(context, listen: false).dropOffLocation;
+      var dropOffUserLatLng = LatLng(dropOff.latitude, dropOff.longitude);
+
+      var details = await AssistantMethods.obtainPlaceDirectionDetails(driverCurrentLocation, dropOffUserLatLng);
+
+      if(details == null)
+      {
+        return;
+      }
+      setState(() {
+        rideStatus = "yendo a destino - "+ details.durationText;
+      });
+
+      isRequestingPositionDetails = false;
+    }
+
+  }
+
 
   void cancelRideRequest(){
 
@@ -177,6 +281,13 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
       markersSet.clear();
       circlesSet.clear();
       pLineCoordinates.clear();
+
+      statusRide = "";
+      driverName = "";
+      driverPhone = "";
+      carDetailsDriver = "";
+      rideStatus  ="El conductor esta llegando";
+      driverDetailsContainerHeight = 0.0;
     });
 
     locatePosition();
@@ -222,9 +333,6 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
     createIconMarker();
     return Scaffold(
       key: scaffoldKey,
-      appBar: AppBar(
-        title: Text("Main Screen"),
-      ),
       drawer: Container(
         color: Colors.white,
         width: 255.0,
@@ -704,64 +812,31 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              height: 55.0,
-                              width: 55.0,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.all(Radius.circular(26.0)),
-                                border: Border.all(width: 2.0,color: Colors.grey),
-
-                              ),
-                              child: Icon(
-                                Icons.call,
-                              ),
-                            ),
-                            SizedBox(height: 10.0,),
-                            Text("LlAMAR"),
-                          ],
-                        ),
-
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              height: 55.0,
-                              width: 55.0,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.all(Radius.circular(26.0)),
-                                border: Border.all(width: 2.0,color: Colors.grey),
-
-                              ),
-                              child: Icon(
-                                Icons.list,
+                        //call button
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 20.0),
+                          child: RaisedButton(
+                            onPressed: () async
+                            {
+                              launch(('tel://${driverPhone}'));
+                            },
+                            color: Colors.pink,
+                            child: Padding(
+                              padding: EdgeInsets.all(17.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Text("call driver", style: TextStyle(fontSize: 20.0, fontWeight:  FontWeight.bold, color: Colors.white),),
+                                  Icon(Icons.call, color: Colors.white, size: 26.0,),
+                                ],
                               ),
                             ),
-                            SizedBox(height: 10.0,),
-                            Text("Detalles"),
-                          ],
+                          )
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              height: 55.0,
-                              width: 55.0,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.all(Radius.circular(26.0)),
-                                border: Border.all(width: 2.0,color: Colors.grey),
 
-                              ),
-                              child: Icon(
-                                Icons.close,
-                              ),
-                            ),
-                            SizedBox(height: 10.0,),
-                            Text("Cancelar"),
-                          ],
-                        ),
+
+
+
                       ],
                     ),
 
@@ -951,7 +1026,7 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
         LatLng driverAvailablePosition = LatLng(driver.latitude, driver.longitude);
 
         Marker marker = Marker(
-          markerId: MarkerId('driver${driver.key}'),
+          markerId: MarkerId('drivers${driver.key}'),
           position: driverAvailablePosition,
           icon: nearByIcon,
           rotation: AssistantMethods.createRandomNumber(360),
@@ -1021,22 +1096,20 @@ class _MainScreenState extends State<MainScreen > with TickerProviderStateMixin{
 
         if(state != "requesting")
         {
-          driversRef.child((driver.key).toString()).child("newRide").set("cancelled");
-          driversRef.child((driver.key).toString()).child("newRide").onDisconnect();
+          driversRef.child((driver.key)).child("newRide").set("cancelled");
+          driversRef.child((driver.key)).child("newRide").onDisconnect();
           driverRequestTimeout = 40;
           timer.cancel();
         }
         driverRequestTimeout = driverRequestTimeout -1;
-        driversRef.child((driver.key).toString()).child("newRide").onValue.listen((event) {
+        driversRef.child((driver.key)).child("newRide").onValue.listen((event) {
           if(event.snapshot.value.toString() == "accepted")
           {
-            driversRef.child((driver.key).toString()).child("newRide").onDisconnect();
+            driversRef.child((driver.key)).child("newRide").onDisconnect();
             driverRequestTimeout = 40;
             timer.cancel();
           }
         });
-
-
         if(driverRequestTimeout ==0){
           driversRef.child((driver.key).toString()).child("newRide").set("timeout");
           driversRef.child((driver.key).toString()).child("newRide").onDisconnect();
