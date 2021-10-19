@@ -30,7 +30,7 @@ class CollectFareDialog extends StatelessWidget
 
               Text("Tarifa de viaje"),
 
-              Divider( height: 2.0. , thickness: 2.0,),
+              Divider( height: 2.0, thickness: 2.0,),
 
               SizedBox(height: 16.0,),
 
