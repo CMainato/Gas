@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:untitled1/AllScreeens/aboutScreen.dart';
 import 'package:untitled1/AllScreeens/mainscreen.dart';
 import 'package:untitled1/AllScreeens/registrationScreen.dart';
 import 'package:untitled1/DataHandler/appData.dart';
@@ -16,6 +17,7 @@ void main() async {
 
 DatabaseReference usersRef = FirebaseDatabase.instance.reference().child("users");
 DatabaseReference driversRef = FirebaseDatabase.instance.reference().child("drivers");
+DatabaseReference newRequestRef = FirebaseDatabase.instance.reference().child("Ride Request");
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -35,6 +37,7 @@ class MyApp extends StatelessWidget {
           RegistrationScreen.idScreen:(context)=>RegistrationScreen(),
           LoginScreen.idScreen:(context)=>LoginScreen(),
           MainScreen.idScreen:(context)=>MainScreen(),
+          AboutScreen.idScreen:(context)=>AboutScreen(),
         } ,
         debugShowCheckedModeBanner: false,
       ),

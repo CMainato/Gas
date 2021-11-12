@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'package:untitled1/AllScreeens/HistoryScreen.dart';
+import 'package:untitled1/AllScreeens/aboutScreen.dart';
+import 'package:untitled1/AllScreeens/profileTabPage.dart';
 import 'package:untitled1/AllScreeens/ratingScreen.dart';
 import 'package:untitled1/AllScreeens/registrationScreen.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -335,6 +338,7 @@ String uName ="";
     initGeoFireListner();
 
     uName= userCurrentInfo.name;
+    AssistantMethods.retrieveHistoryInfo(context);
   }
 
   static final CameraPosition _kGooglePlex = CameraPosition(
@@ -367,7 +371,12 @@ String uName ="";
                         children: [
                           Text(uName, style: TextStyle(fontSize: 16.0, fontFamily: "Brand-Blod"),),
                           SizedBox(height: 6.0,),
-                          Text("Visitar perfil"),
+                          GestureDetector(
+                              onTap: () {
+
+                                Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfileTabPage()));
+                              },
+                              child: Text("Visitar perfil")),
                         ],
                       ),
                     ],
@@ -381,17 +390,33 @@ String uName ="";
 
 
               //Drawer body, Controllers
-              ListTile(
-                leading: Icon(Icons.history),
-                title: Text("Historia", style: TextStyle(fontSize: 15.0),),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => HistoryScreen()));
+                },
+                child: ListTile(
+                  leading: Icon(Icons.history),
+                  title: Text("History", style: TextStyle(fontSize: 15.0),),
+                ),
               ),
               ListTile(
                 leading: Icon(Icons.person),
-                title: Text("Visitar Perfil", style: TextStyle(fontSize: 15.0),),
+                title: GestureDetector(
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfileTabPage()));
+                    },
+                    child: Text("Visitar Perfil", style: TextStyle(fontSize: 15.0),)),
               ),
-              ListTile(
-                leading: Icon(Icons.info),
-                title: Text("Nosotros", style: TextStyle(fontSize: 15.0),),
+              GestureDetector(
+                  onTap: () {
+
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, AboutScreen.idScreen, (route) => false);
+                  },
+                child: ListTile(
+                  leading: Icon(Icons.info),
+                  title: Text("Nosotros", style: TextStyle(fontSize: 15.0),),
+                ),
               ),
               GestureDetector(
                 onTap: (){
@@ -399,7 +424,7 @@ String uName ="";
                   Navigator.pushNamedAndRemoveUntil(context, LoginScreen.idScreen, (route) => false);
                 },
                 child: ListTile(
-                  leading: Icon(Icons.info),
+                  leading: Icon(Icons.logout),
                   title: Text("Salir", style: TextStyle(fontSize: 15.0),),
                 ),
               ),
@@ -1172,7 +1197,7 @@ String uName ="";
     driversRef.child(driver.key).child("car_details").child("type").once().then((DataSnapshot snap)async
     {
 if(await snap.value !=null){
-  String carType=snap.toString();
+  String carType=snap.value.toString();
   if(carType==carRideType)
   {
     notifyDriver(driver);
