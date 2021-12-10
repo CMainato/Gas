@@ -1,8 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:untitled1/Assistants/assistantMethods.dart';
-
 import 'package:untitled1/Models/history.dart';
+
 
 class HistoryItem extends StatelessWidget
 {
