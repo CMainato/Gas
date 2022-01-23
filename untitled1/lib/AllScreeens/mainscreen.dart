@@ -392,11 +392,13 @@ String uName ="";
               //Drawer body, Controllers
               GestureDetector(
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => HistoryScreen()));
+                  {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => HistoryScreen()));
+                  }
                 },
                 child: ListTile(
                   leading: Icon(Icons.history),
-                  title: Text("History", style: TextStyle(fontSize: 15.0),),
+                  title: Text("Historial de viajes", style: TextStyle(fontSize: 15.0),),
                 ),
               ),
               ListTile(
