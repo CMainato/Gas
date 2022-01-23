@@ -1,16 +1,15 @@
+
 import 'package:flutter/material.dart';
 import 'package:untitled1/Assistants/assistantMethods.dart';
 import 'package:untitled1/Models/history.dart';
 
+class HistoryItem extends StatelessWidget {
 
-class HistoryItem extends StatelessWidget
-{
   final History history;
   HistoryItem({this.history});
 
   @override
-  Widget build(BuildContext context)
-  {
+  Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Column(
@@ -18,21 +17,20 @@ class HistoryItem extends StatelessWidget
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               Container(
                 child: Row(
                   children: <Widget>[
 
                     Image.asset('images/pickicon.png', height: 16, width: 16,),
                     SizedBox(width: 18,),
-                    Expanded(child: Container(child: Text(history.pickup, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 18),))),
+                    Expanded(child: Container(child: Text(history.pickUp, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: "Brand-Blod", fontSize: 16.0),))),
                     SizedBox(width: 5,),
+                    Text('\$${history.fares}', style: TextStyle(fontFamily: 'Brand-Bold', fontSize: 16, color: Colors.black87),),
 
-                    Text('\$${history.fares}', style: TextStyle(fontFamily: 'Brand Bold', fontSize: 16, color: Colors.black87),),
+
                   ],
                 ),
               ),
-
               SizedBox(height: 8,),
 
               Row(
@@ -46,12 +44,14 @@ class HistoryItem extends StatelessWidget
               ),
 
               SizedBox(height: 15,),
+              Text(AssistantMethods.formatTripDate(history.createdAt) , style: TextStyle(color: Colors.grey),)
 
-              Text(AssistantMethods.formatTripDate(history.createdAt), style: TextStyle(color: Colors.grey),),
+
             ],
           ),
         ],
       ),
+
     );
   }
 }
